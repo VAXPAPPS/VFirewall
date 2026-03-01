@@ -42,4 +42,3 @@ ninja -C build
 
 ---
 *Built for VAXP-OS*
-# VFirewall
