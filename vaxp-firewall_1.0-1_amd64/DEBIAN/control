@@ -1,0 +1,10 @@
+Package: vaxp-firewall
+Version: 1.0-1
+Section: admin
+Priority: optional
+Architecture: amd64
+Depends: bash, ufw, polkitd, libgtk-4-1, libadwaita-1-0, libnotify4, libglib2.0-0
+Maintainer: VAXP Developer <admin@vaxp.com>
+Description: Graphical user interface for Uncomplicated Firewall (UFW)
+ VAXP Firewall provides an elegant and comprehensive GTK4 interface
+ for managing network policies, applications, and traffic monitoring.

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=VAXP Firewall
+Comment=Configure Uncomplicated Firewall
+Exec=vaxp-firewall
+Icon=security-high-symbolic
+Terminal=false
+Type=Application
+Categories=System;Settings;Security;
+Keywords=ufw;firewall;network;security;
+StartupNotify=true
