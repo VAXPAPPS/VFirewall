@@ -9,7 +9,7 @@ static void load_css(void) {
         "textview.view, scrolledwindow { background-color: transparent; }\n"
         "actionbar > revealer > box { background-color: transparent; border: none; }\n"
         "actionbar { background-color: transparent; border: none; }\n"
-        "headerbar { min-height: 46px; border-bottom: 1px solid rgba(255,255,255,0.05); }\n"
+        "headerbar { min-height: 46px; background: transparent; border: none; box-shadow: none; }\n"
         "headerbar button.titlebutton { min-height: 14px; min-width: 14px; padding: 0; margin-top: 16px; margin-bottom: 16px; border-radius: 999px; border: none; color: transparent; }\n"
         "headerbar button.titlebutton.close { background-color: #ff5f56; margin-right: 12px; }\n"
         "headerbar button.titlebutton.maximize { background-color: #27c93f; }\n"
