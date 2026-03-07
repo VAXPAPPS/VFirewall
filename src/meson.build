@@ -7,10 +7,9 @@ vaxp_sources = [
 
 vaxp_deps = [
   gtk_dep,
-  adwaita_dep,
   gio_dep,
   gio_unix_dep,
-  notify_dep
+  notify_dep,
 ]
 
 gnome = import('gnome')

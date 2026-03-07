@@ -3,7 +3,9 @@
 #include <libnotify/notify.h>
 
 struct _VaxpWindow {
-    AdwApplicationWindow parent_instance;
+    GtkApplicationWindow parent_instance;
+    
+    GtkHeaderBar *headerbar;
     
     GtkSwitch *ufw_switch;
     GtkLabel *status_label;
@@ -11,7 +13,7 @@ struct _VaxpWindow {
     GtkDropDown *incoming_policy_drop;
     GtkDropDown *outgoing_policy_drop;
     
-    AdwPreferencesGroup *rules_group;
+    GtkListBox *rules_group;
     GtkButton *add_rule_btn;
     GtkButton *refresh_rules_btn;
     GtkTextView *logs_view;
@@ -25,7 +27,7 @@ struct _VaxpWindow {
     guint timer_id;
 };
 
-G_DEFINE_TYPE(VaxpWindow, vaxp_window, ADW_TYPE_APPLICATION_WINDOW)
+G_DEFINE_TYPE(VaxpWindow, vaxp_window, GTK_TYPE_APPLICATION_WINDOW)
 
 static void populate_rules_list(VaxpWindow *self);
 static void refresh_logs(VaxpWindow *self);
@@ -154,10 +156,10 @@ static void on_delete_rule_clicked(GtkButton *btn, gpointer user_data) {
     populate_rules_list(self);
 }
 
-static void on_add_rule_response(AdwMessageDialog *dialog, gchar *response, gpointer user_data) {
+static void on_add_rule_response(GtkDialog *dialog, gint response, gpointer user_data) {
     VaxpWindow *self = VAXP_WINDOW(user_data);
     
-    if (g_strcmp0(response, "add") == 0) {
+    if (response == GTK_RESPONSE_ACCEPT) {
         GtkNotebook *notebook = GTK_NOTEBOOK(g_object_get_data(G_OBJECT(dialog), "notebook"));
         gint page = gtk_notebook_get_current_page(notebook);
         GError *error = NULL;
@@ -214,17 +216,24 @@ static void on_add_rule_response(AdwMessageDialog *dialog, gchar *response, gpoi
         populate_rules_list(self);
         refresh_logs(self);
     }
+    gtk_window_destroy(GTK_WINDOW(dialog));
 }
 
 static void on_add_rule_clicked(GtkButton *btn, gpointer user_data) {
     VaxpWindow *self = VAXP_WINDOW(user_data);
     
-    AdwMessageDialog *dialog = ADW_MESSAGE_DIALOG(adw_message_dialog_new(GTK_WINDOW(self), "Add Rule", "Create a new UFW rule"));
-    adw_message_dialog_add_response(dialog, "cancel", "Cancel");
-    adw_message_dialog_add_response(dialog, "add", "Add");
-    adw_message_dialog_set_response_appearance(dialog, "add", ADW_RESPONSE_SUGGESTED);
-    adw_message_dialog_set_default_response(dialog, "add");
-    adw_message_dialog_set_close_response(dialog, "cancel");
+    GtkWidget *dialog = gtk_dialog_new_with_buttons("Add Rule",
+                                                    GTK_WINDOW(self),
+                                                    GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT,
+                                                    "Cancel", GTK_RESPONSE_CANCEL,
+                                                    "Add", GTK_RESPONSE_ACCEPT,
+                                                    NULL);
+    
+    GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+    gtk_widget_set_margin_top(content_area, 12);
+    gtk_widget_set_margin_bottom(content_area, 12);
+    gtk_widget_set_margin_start(content_area, 12);
+    gtk_widget_set_margin_end(content_area, 12);
     
     GtkWidget *notebook = gtk_notebook_new();
     
@@ -267,7 +276,7 @@ static void on_add_rule_clicked(GtkButton *btn, gpointer user_data) {
     
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), app_box, gtk_label_new("Application"));
     
-    adw_message_dialog_set_extra_child(dialog, notebook);
+    gtk_box_append(GTK_BOX(content_area), notebook);
     
     g_object_set_data(G_OBJECT(dialog), "notebook", notebook);
     g_object_set_data(G_OBJECT(dialog), "port_entry", port_entry);
@@ -299,9 +308,8 @@ static void populate_rules_list(VaxpWindow *self) {
     GtkWidget *child = gtk_widget_get_first_child(GTK_WIDGET(self->rules_group));
     while (child != NULL) {
         GtkWidget *next = gtk_widget_get_next_sibling(child);
-        // Only remove rows, not the title (if any internal thing exists)
-        if (ADW_IS_ACTION_ROW(child)) {
-            adw_preferences_group_remove(self->rules_group, child);
+        if (GTK_IS_LIST_BOX_ROW(child)) {
+            gtk_list_box_remove(self->rules_group, child);
         }
         child = next;
     }
@@ -315,34 +323,63 @@ static void populate_rules_list(VaxpWindow *self) {
             g_error_free(error);
         }
         
-        AdwActionRow *empty_row = ADW_ACTION_ROW(adw_action_row_new());
-        adw_preferences_row_set_title(ADW_PREFERENCES_ROW(empty_row), "No active rules found. Verify UFW is enabled.");
-        adw_preferences_group_add(self->rules_group, GTK_WIDGET(empty_row));
+        GtkWidget *empty_row = gtk_list_box_row_new();
+        gtk_widget_set_focusable(empty_row, FALSE);
+        GtkWidget *empty_label = gtk_label_new("No active rules found. Verify UFW is enabled.");
+        gtk_widget_set_margin_top(empty_label, 12);
+        gtk_widget_set_margin_bottom(empty_label, 12);
+        gtk_list_box_append(self->rules_group, empty_row);
+        gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(empty_row), empty_label);
         return;
     }
 
     for (GList *iter = rules; iter != NULL; iter = iter->next) {
         VaxpUfwRule *rule = (VaxpUfwRule *)iter->data;
         
-        AdwActionRow *row = ADW_ACTION_ROW(adw_action_row_new());
-        gchar *title = g_strdup_printf("[%d] %s", rule->number, rule->to);
-        gchar *subtitle = g_strdup_printf("Action: %s | From: %s", rule->action, rule->from);
+        GtkWidget *row = gtk_list_box_row_new();
+        gtk_widget_set_focusable(row, FALSE);
         
-        adw_preferences_row_set_title(ADW_PREFERENCES_ROW(row), title);
-        adw_action_row_set_subtitle(row, subtitle);
+        GtkWidget *hbox = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 12);
+        gtk_widget_set_margin_start(hbox, 12);
+        gtk_widget_set_margin_end(hbox, 12);
+        gtk_widget_set_margin_top(hbox, 8);
+        gtk_widget_set_margin_bottom(hbox, 8);
         
-        // Add a delete button (placeholder functionality for now)
+        GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 4);
+        gtk_widget_set_hexpand(vbox, TRUE);
+        gtk_widget_set_valign(vbox, GTK_ALIGN_CENTER);
+
+        gchar *title_str = g_strdup_printf("[%d] %s", rule->number, rule->to);
+        gchar *subtitle_str = g_strdup_printf("Action: %s | From: %s", rule->action, rule->from);
+
+        GtkWidget *title = gtk_label_new(title_str);
+        gtk_widget_set_halign(title, GTK_ALIGN_START);
+        gtk_label_set_ellipsize(GTK_LABEL(title), PANGO_ELLIPSIZE_END);
+        
+        GtkWidget *subtitle = gtk_label_new(subtitle_str);
+        gtk_widget_set_halign(subtitle, GTK_ALIGN_START);
+        gtk_widget_add_css_class(subtitle, "dim-label");
+        gtk_label_set_ellipsize(GTK_LABEL(subtitle), PANGO_ELLIPSIZE_END);
+        
+        gtk_box_append(GTK_BOX(vbox), title);
+        gtk_box_append(GTK_BOX(vbox), subtitle);
+        
+        gtk_box_append(GTK_BOX(hbox), vbox);
+        
+        // Add a delete button
         GtkWidget *del_btn = gtk_button_new_from_icon_name("user-trash-symbolic");
         gtk_widget_set_valign(del_btn, GTK_ALIGN_CENTER);
         gtk_widget_add_css_class(del_btn, "destructive-action");
         g_object_set_data(G_OBJECT(del_btn), "rule_number", GINT_TO_POINTER(rule->number));
         g_signal_connect(del_btn, "clicked", G_CALLBACK(on_delete_rule_clicked), self);
-        adw_action_row_add_suffix(row, del_btn);
         
-        adw_preferences_group_add(self->rules_group, GTK_WIDGET(row));
+        gtk_box_append(GTK_BOX(hbox), del_btn);
         
-        g_free(title);
-        g_free(subtitle);
+        gtk_list_box_row_set_child(GTK_LIST_BOX_ROW(row), hbox);
+        gtk_list_box_append(self->rules_group, row);
+        
+        g_free(title_str);
+        g_free(subtitle_str);
         vaxp_ufw_rule_free(rule);
     }
     g_list_free(rules);
@@ -446,6 +483,7 @@ static void vaxp_window_class_init(VaxpWindowClass *class) {
     
     gtk_widget_class_set_template_from_resource(widget_class, "/com/vaxp/firewall/ui/vaxp_window.ui");
     
+    gtk_widget_class_bind_template_child(widget_class, VaxpWindow, headerbar);
     gtk_widget_class_bind_template_child(widget_class, VaxpWindow, ufw_switch);
     gtk_widget_class_bind_template_child(widget_class, VaxpWindow, status_label);
     gtk_widget_class_bind_template_child(widget_class, VaxpWindow, incoming_policy_drop);

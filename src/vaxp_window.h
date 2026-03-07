@@ -2,12 +2,11 @@
 #define VAXP_WINDOW_H
 
 #include <gtk/gtk.h>
-#include <adwaita.h>
 
 G_BEGIN_DECLS
 
 #define VAXP_TYPE_WINDOW (vaxp_window_get_type())
-G_DECLARE_FINAL_TYPE(VaxpWindow, vaxp_window, VAXP, WINDOW, AdwApplicationWindow)
+G_DECLARE_FINAL_TYPE(VaxpWindow, vaxp_window, VAXP, WINDOW, GtkApplicationWindow)
 
 VaxpWindow* vaxp_window_new(GtkApplication *app);
 

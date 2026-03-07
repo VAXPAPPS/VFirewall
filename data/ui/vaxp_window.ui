@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk" version="4.0"/>
-  <requires lib="adw" version="1.0"/>
-  <template class="VaxpWindow" parent="AdwApplicationWindow">
+  <template class="VaxpWindow" parent="GtkApplicationWindow">
     <property name="default-width">800</property>
     <property name="default-height">600</property>
     <property name="title">VAXP Firewall</property>
     
-    <child>
-      <object class="AdwToolbarView">
-        <child type="top">
-          <object class="AdwHeaderBar">
-            <property name="title-widget">
-              <object class="AdwViewSwitcherTitle" id="switcher_title">
-                <property name="title">VAXP Firewall</property>
-                <property name="stack">view_stack</property>
-              </object>
-            </property>
+    <child type="titlebar">
+      <object class="GtkHeaderBar" id="headerbar">
+        <property name="show-title-buttons">True</property>
+        <property name="title-widget">
+          <object class="GtkStackSwitcher" id="switcher_bar">
+            <property name="stack">view_stack</property>
           </object>
-        </child>
+        </property>
+      </object>
+    </child>
+
+    <child>
+      <object class="GtkBox">
+        <property name="orientation">vertical</property>
         
         <child>
-          <object class="AdwViewStack" id="view_stack">
+          <object class="GtkStack" id="view_stack">
+            <property name="vexpand">True</property>
             
             <!-- Dashboard Page -->
             <child>
-              <object class="AdwViewStackPage">
+              <object class="GtkStackPage">
                 <property name="name">dashboard</property>
                 <property name="title">Dashboard</property>
                 <property name="icon-name">home-symbolic</property>
@@ -38,37 +40,135 @@
                     <property name="margin-start">32</property>
                     <property name="margin-end">32</property>
                     <child>
-                      <object class="AdwPreferencesGroup">
-                        <property name="title">Firewall Status</property>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">12</property>
                         <child>
-                          <object class="AdwActionRow">
-                            <property name="title">Enable Firewall</property>
-                            <property name="subtitle">Toggle to turn UFW on or off</property>
-                            <child type="suffix">
-                              <object class="GtkSwitch" id="ufw_switch">
-                                <property name="valign">center</property>
-                              </object>
-                            </child>
+                          <object class="GtkLabel">
+                            <property name="label">Firewall Status</property>
+                            <property name="halign">start</property>
+                            <style><class name="heading"/></style>
                           </object>
                         </child>
                         <child>
-                          <object class="AdwActionRow" id="policy_incoming_row">
-                            <property name="title">Incoming Policy</property>
-                            <property name="subtitle">Default action for incoming connections</property>
-                            <child type="suffix">
-                              <object class="GtkDropDown" id="incoming_policy_drop">
-                                <property name="valign">center</property>
+                          <object class="GtkListBox">
+                            <property name="selection-mode">none</property>
+                            <style><class name="boxed-list"/></style>
+                            <child>
+                              <object class="GtkListBoxRow">
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">horizontal</property>
+                                    <property name="spacing">12</property>
+                                    <property name="margin-top">12</property>
+                                    <property name="margin-bottom">12</property>
+                                    <property name="margin-start">12</property>
+                                    <property name="margin-end">12</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="orientation">vertical</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Enable Firewall</property>
+                                            <property name="halign">start</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Toggle to turn UFW on or off</property>
+                                            <property name="halign">start</property>
+                                            <style><class name="dim-label"/></style>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSwitch" id="ufw_switch">
+                                        <property name="valign">center</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
                               </object>
                             </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="AdwActionRow" id="policy_outgoing_row">
-                            <property name="title">Outgoing Policy</property>
-                            <property name="subtitle">Default action for outgoing connections</property>
-                            <child type="suffix">
-                              <object class="GtkDropDown" id="outgoing_policy_drop">
-                                <property name="valign">center</property>
+                            <child>
+                              <object class="GtkListBoxRow" id="policy_incoming_row">
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">horizontal</property>
+                                    <property name="spacing">12</property>
+                                    <property name="margin-top">12</property>
+                                    <property name="margin-bottom">12</property>
+                                    <property name="margin-start">12</property>
+                                    <property name="margin-end">12</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="orientation">vertical</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Incoming Policy</property>
+                                            <property name="halign">start</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Default action for incoming connections</property>
+                                            <property name="halign">start</property>
+                                            <style><class name="dim-label"/></style>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkDropDown" id="incoming_policy_drop">
+                                        <property name="valign">center</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkListBoxRow" id="policy_outgoing_row">
+                                <child>
+                                  <object class="GtkBox">
+                                    <property name="orientation">horizontal</property>
+                                    <property name="spacing">12</property>
+                                    <property name="margin-top">12</property>
+                                    <property name="margin-bottom">12</property>
+                                    <property name="margin-start">12</property>
+                                    <property name="margin-end">12</property>
+                                    <child>
+                                      <object class="GtkBox">
+                                        <property name="orientation">vertical</property>
+                                        <property name="hexpand">True</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Outgoing Policy</property>
+                                            <property name="halign">start</property>
+                                          </object>
+                                        </child>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="label">Default action for outgoing connections</property>
+                                            <property name="halign">start</property>
+                                            <style><class name="dim-label"/></style>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="GtkDropDown" id="outgoing_policy_drop">
+                                        <property name="valign">center</property>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -84,8 +184,16 @@
                       </object>
                     </child>
                     <child>
-                      <object class="AdwPreferencesGroup">
-                        <property name="title">Network Activity</property>
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">12</property>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="label">Network Activity</property>
+                            <property name="halign">start</property>
+                            <style><class name="heading"/></style>
+                          </object>
+                        </child>
                         <child>
                           <object class="GtkDrawingArea" id="network_graph">
                             <property name="height-request">150</property>
@@ -103,7 +211,7 @@
 
             <!-- Rules Page -->
             <child>
-              <object class="AdwViewStackPage">
+              <object class="GtkStackPage">
                 <property name="name">rules</property>
                 <property name="title">Rules</property>
                 <property name="icon-name">network-transmit-receive-symbolic</property>
@@ -111,43 +219,59 @@
                   <object class="GtkScrolledWindow">
                     <property name="vexpand">True</property>
                     <child>
-                      <object class="AdwClamp">
+                      <object class="GtkBox">
+                        <property name="orientation">vertical</property>
                         <property name="margin-top">24</property>
                         <property name="margin-bottom">24</property>
                         <property name="margin-start">16</property>
                         <property name="margin-end">16</property>
+                        <property name="spacing">16</property>
                         <child>
                           <object class="GtkBox">
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">16</property>
+                            <property name="orientation">horizontal</property>
+                            <property name="spacing">12</property>
+                            <property name="halign">end</property>
                             <child>
-                              <object class="GtkBox">
-                                <property name="orientation">horizontal</property>
-                                <property name="spacing">12</property>
-                                <property name="halign">end</property>
-                                <child>
-                                  <object class="GtkButton" id="refresh_rules_btn">
-                                    <property name="icon-name">view-refresh-symbolic</property>
-                                    <property name="tooltip-text">Refresh Rules</property>
-                                    <property name="valign">center</property>
-                                  </object>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="add_rule_btn">
-                                    <property name="label">Add Rule</property>
-                                    <property name="icon-name">list-add-symbolic</property>
-                                    <property name="valign">center</property>
-                                    <style>
-                                      <class name="suggested-action"/>
-                                    </style>
-                                  </object>
-                                </child>
+                              <object class="GtkButton" id="refresh_rules_btn">
+                                <property name="icon-name">view-refresh-symbolic</property>
+                                <property name="tooltip-text">Refresh Rules</property>
+                                <property name="valign">center</property>
                               </object>
                             </child>
                             <child>
-                              <object class="AdwPreferencesGroup" id="rules_group">
-                                <property name="title">Active Rules</property>
-                                <property name="description">Manage your UFW rules</property>
+                              <object class="GtkButton" id="add_rule_btn">
+                                <property name="label">Add Rule</property>
+                                <property name="icon-name">list-add-symbolic</property>
+                                <property name="valign">center</property>
+                                <style>
+                                  <class name="var-btn"/>
+                                </style>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
+                            <property name="spacing">12</property>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">Active Rules</property>
+                                <property name="halign">start</property>
+                                <style><class name="heading"/></style>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkLabel">
+                                <property name="label">Manage your UFW rules</property>
+                                <property name="halign">start</property>
+                                <style><class name="dim-label"/></style>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkListBox" id="rules_group">
+                                <property name="selection-mode">none</property>
+                                <style><class name="boxed-list"/></style>
                               </object>
                             </child>
                           </object>
@@ -161,7 +285,7 @@
 
             <!-- Logs Page -->
             <child>
-              <object class="AdwViewStackPage">
+              <object class="GtkStackPage">
                 <property name="name">logs</property>
                 <property name="title">Logs</property>
                 <property name="icon-name">format-justify-left-symbolic</property>
@@ -185,13 +309,6 @@
 
           </object>
         </child>
-        
-        <child type="bottom">
-          <object class="AdwViewSwitcherBar" id="switcher_bar">
-            <property name="stack">view_stack</property>
-          </object>
-        </child>
-        
       </object>
     </child>
   </template>
