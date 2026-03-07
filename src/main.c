@@ -5,7 +5,7 @@
 static void load_css(void) {
     GtkCssProvider *provider = gtk_css_provider_new();
     gtk_css_provider_load_from_string(provider, 
-        "window, .background, window.background { background-color: rgba(0, 0, 0, 0.392); }\n"
+        "window, window.csd, window.solid-csd, .background, window.background { background-color: rgba(0, 0, 0, 0.392); }\n"
         "textview.view, scrolledwindow { background-color: transparent; }\n"
         "actionbar > revealer > box { background-color: transparent; border: none; }\n"
         "actionbar { background-color: transparent; border: none; }\n"
