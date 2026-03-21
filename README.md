@@ -27,7 +27,6 @@ sudo dpkg -i vaxp-firewall_1.0-1_amd64.deb
 ### Dependencies
 You need the following libraries installed to build VFirewall:
 *   `libgtk-4-dev`
-*   `libadwaita-1-dev`
 *   `libnotify-dev`
 *   `meson` & `ninja-build`
 *   `ufw` & `policykit-1`
