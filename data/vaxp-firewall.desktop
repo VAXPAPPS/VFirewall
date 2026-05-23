@@ -2,7 +2,7 @@
 Name=VAXP Firewall
 Comment=Configure Uncomplicated Firewall
 Exec=vaxp-firewall
-Icon=security-high-symbolic
+Icon=vaxp-firewall
 Terminal=false
 Type=Application
 Categories=System;Settings;Security;
