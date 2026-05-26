@@ -2,7 +2,8 @@ vaxp_sources = [
   'main.c',
   'vaxp_window.c',
   'vaxp_ufw_backend.c',
-  'vaxp_polkit_helper.c'
+  'vaxp_polkit_helper.c',
+  'theme_manager.c'
 ]
 
 vaxp_deps = [

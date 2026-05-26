@@ -1,6 +1,7 @@
 #include <gtk/gtk.h>
 #include <libnotify/notify.h>
 #include "vaxp_window.h"
+#include "theme_manager.h"
 
 static void load_css(void) {
     GtkCssProvider *provider = gtk_css_provider_new();
@@ -23,6 +24,7 @@ static void load_css(void) {
 
 static void on_activate(GtkApplication *app, gpointer user_data) {
     load_css();
+    theme_manager_init();
     VaxpWindow *win = vaxp_window_new(app);
     gtk_window_present(GTK_WINDOW(win));
 }
